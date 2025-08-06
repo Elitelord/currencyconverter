@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import CurrencyAPI from '@everapi/currencyapi-js';
+import { LineChart } from '@mui/x-charts';
 
 // --- Type Interfaces ---
 interface Currency {
@@ -42,15 +43,18 @@ interface CurrencyApiResponse {
 export default function Home() {
   // State for form inputs
   const [amount, setAmount] = useState<number>(1);
-  const [fromCurrency, setFromCurrency] = useState<Currency | null>({ code: 'USD', name: 'United States Dollar' });
-  const [toCurrency, setToCurrency] = useState<Currency | null>({ code: 'EUR', name: 'Euro' });
+  const [fromCurrency, setFromCurrency] = useState<Currency | undefined>({ code: 'USD', name: 'United States Dollar' });
+  const [toCurrency, setToCurrency] = useState<Currency | undefined>({ code: 'EUR', name: 'Euro' });
 
   // State for API data and status
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<number | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
-
+  const [loading2, setLoading2] = useState(false);
+  const [error2, setError2] = useState<string | null>(null);
+  const [result2, setResult2] = useState<number | null>(null);
+  const [lastUpdated2, setLastUpdated2] = useState<string | null>(null);
   // Sample currency list for the Autocomplete dropdowns
   const currencies: Currency[] = [
     { code: 'USD', name: 'United States Dollar' },
@@ -94,7 +98,36 @@ export default function Home() {
       setLoading(false);
     });
   };
-  
+  const showHistoricalData=()=>{
+    if (!fromCurrency || !toCurrency || !amount) {
+      setError2('Please fill in all fields.');
+      return;
+    }
+
+    setLoading2(true);
+    setError2(null);
+    setResult2(null);
+
+    const client = new CurrencyAPI(process.env.NEXT_PUBLIC_API_KEY);
+
+    client.latest({
+      base_currency: fromCurrency.code,
+      currencies: toCurrency.code,
+    }).then((response: CurrencyApiResponse) => {
+      if (response.data && response.data[toCurrency.code]) {
+        const rate = response.data[toCurrency.code].value;
+        setResult(rate * amount);
+        setLastUpdated(new Date(response.meta.last_updated_at).toLocaleString());
+      } else {
+         setError('Could not fetch conversion rate. Please check the currency codes.');
+      }
+    }).catch((err : Error) => {
+      console.error("API Error:", err);
+      setError('Failed to connect to the currency API. Please check your API key and connection.');
+    }).finally(() => {
+      setLoading(false);
+    });
+  }
   // Trigger conversion on initial load
   useEffect(() => {
     handleConversion();
@@ -185,7 +218,32 @@ export default function Home() {
                 </Card>
               )}
             </Box>
-
+            
+          {/* 4. Convert Button */}
+            <Box textAlign="center" sx={{ mt: 3 }}>
+              <Button 
+                variant="contained" 
+                size="large" 
+                onClick={handleConversion}
+                disabled={loading}
+              >
+                {loading ? <CircularProgress size={24} color="inherit" /> : 'Show Historical Exchange Data'}
+              </Button>
+            </Box>
+          
+          <Box textAlign="center" sx={{ mt: 3 }}>
+              <p>Historical Exchange Data</p>
+              <LineChart 
+              xAxis={[{ data: [1,2,3,5,8,10]}]}>,
+                series={[
+              {
+              data: [2, 5.5, 2, 8.5, 1.5, 5],
+              },
+              ]}
+              height={300}
+              
+              </LineChart>
+          </Box>
           </CardContent>
         </Card>
       </Container>
