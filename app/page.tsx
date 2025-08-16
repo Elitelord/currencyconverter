@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-
+// import { AxisConfig } from '@mui/x-charts/models';
 // Import Material-UI components
 import {
   Container,
@@ -45,6 +45,24 @@ export default function Home() {
   const [amount, setAmount] = useState<number>(1);
   const [fromCurrency, setFromCurrency] = useState<Currency | undefined>({ code: 'USD', name: 'United States Dollar' });
   const [toCurrency, setToCurrency] = useState<Currency | undefined>({ code: 'EUR', name: 'Euro' });
+//   const xAxisData: AxisConfig[] = [
+//   {
+//     id: 'x-axis-1', // It's good practice to provide a unique id
+//     data: [1, 2, 3, 5, 8, 10],
+//     scaleType: 'linear', // Explicitly define the scale type
+//   },
+// ];
+
+// // Define the type for the series configuration.
+// // It's an array of objects, where each object contains the data points.
+//     const seriesData: SeriesConfig<'line'>[] = [
+//     {
+//       id: 'series-1', // Unique id for the series
+//       data: [2, 5.5, 2, 8.5, 1.5, 5],
+//       color: '#4e79a7', // Optional: Add a color for styling
+//         label: 'Sample Data', // Optional: Add a label for the legend
+//       },
+//     ];
 
   // State for API data and status
   const [loading, setLoading] = useState(false);
@@ -110,18 +128,13 @@ export default function Home() {
 
     const client = new CurrencyAPI(process.env.NEXT_PUBLIC_API_KEY);
 
-    client.latest({
-      base_currency: fromCurrency.code,
-      currencies: toCurrency.code,
-    }).then((response: CurrencyApiResponse) => {
-      if (response.data && response.data[toCurrency.code]) {
-        const rate = response.data[toCurrency.code].value;
-        setResult(rate * amount);
-        setLastUpdated(new Date(response.meta.last_updated_at).toLocaleString());
-      } else {
-         setError('Could not fetch conversion rate. Please check the currency codes.');
-      }
-    }).catch((err : Error) => {
+   client.range({
+    datetime_start: '2021-11-30T23:59:59Z',
+    datetime_end: '2021-12-30T23:59:59Z',
+    accuracy: 'day'
+}).then((response: CurrencyApiResponse) => {
+    console.log(response)
+}).catch((err : Error) => {
       console.error("API Error:", err);
       setError('Failed to connect to the currency API. Please check your API key and connection.');
     }).finally(() => {
@@ -224,26 +237,25 @@ export default function Home() {
               <Button 
                 variant="contained" 
                 size="large" 
-                onClick={handleConversion}
+                onClick={showHistoricalData}
                 disabled={loading}
               >
                 {loading ? <CircularProgress size={24} color="inherit" /> : 'Show Historical Exchange Data'}
               </Button>
             </Box>
           
-          <Box textAlign="center" sx={{ mt: 3 }}>
+          {<Box textAlign="center" sx={{ mt: 3 }}>
               <p>Historical Exchange Data</p>
-              <LineChart 
-              xAxis={[{ data: [1,2,3,5,8,10]}]}>,
-                series={[
-              {
+              <LineChart
+              xAxis={[{ data: [1, 2, 3, 5, 8, 10] }]}
+              series={[
+                {
               data: [2, 5.5, 2, 8.5, 1.5, 5],
-              },
-              ]}
-              height={300}
-              
-              </LineChart>
-          </Box>
+                },
+            ]}
+            height={300}
+             />
+          </Box>}
           </CardContent>
         </Card>
       </Container>
