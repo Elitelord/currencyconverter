@@ -86,6 +86,12 @@ export default function Home() {
   ];
 
   // Function to fetch currency data
+  const swapCurrencies = ()=>{
+    let temp = fromCurrency;
+    setFromCurrency(toCurrency);
+    setToCurrency(temp);
+    handleConversion();
+  }
   const handleConversion = () => {
     if (!fromCurrency || !toCurrency || !amount) {
       setError('Please fill in all fields.');
@@ -178,7 +184,9 @@ export default function Home() {
                 />
               </Grid>
               <Grid item xs={12} md={2} textAlign="center">
+                  <Button onClick={swapCurrencies}>
                   <SwapHorizIcon color="action" />
+                  </Button>
               </Grid>
               <Grid item xs={12} md={5}>
                 <Autocomplete
@@ -232,30 +240,9 @@ export default function Home() {
               )}
             </Box>
             
-          {/* 4. Convert Button */}
-            <Box textAlign="center" sx={{ mt: 3 }}>
-              <Button 
-                variant="contained" 
-                size="large" 
-                onClick={showHistoricalData}
-                disabled={loading}
-              >
-                {loading ? <CircularProgress size={24} color="inherit" /> : 'Show Historical Exchange Data'}
-              </Button>
-            </Box>
+         
           
-          {<Box textAlign="center" sx={{ mt: 3 }}>
-              <p>Historical Exchange Data</p>
-              <LineChart
-              xAxis={[{ data: [1, 2, 3, 5, 8, 10] }]}
-              series={[
-                {
-              data: [2, 5.5, 2, 8.5, 1.5, 5],
-                },
-            ]}
-            height={300}
-             />
-          </Box>}
+          
           </CardContent>
         </Card>
       </Container>
