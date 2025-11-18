@@ -17,6 +17,7 @@
     "@mui/material": "^5.18.0",
     "@mui/material-nextjs": "^5.16.6",
     "@mui/x-charts": "^7.12.1",
+    "@vercel/analytics": "^1.5.0",
     "next": "^14.2.30",
     "react": "^18",
     "react-dom": "^18"
